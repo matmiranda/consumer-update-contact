@@ -4,11 +4,11 @@ EXPOSE 80
 
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
-COPY ["Consumer.Contact.Update.Worker/Consumer.Contact.Update.Worker.csproj", "CriarContatos.Api/"]
+COPY ["Consumer.Contact.Update.Worker/Consumer.Contact.Update.Worker.csproj", "CriarContatos.Worker/"]
 COPY ["Consumer.Contact.Update.Domain/Consumer.Contact.Update.Domain.csproj", "Consumer.Contact.Update.Domain/"]
 COPY ["Consumer.Contact.Update.Infrastructure/Consumer.Contact.Update.Infrastructure.csproj", "Consumer.Contact.Update.Infrastructure/"]
 COPY ["Consumer.Contact.Update.Service/Consumer.Contact.Update.Service.csproj", "Consumer.Contact.Update.Service/"]
-RUN dotnet restore "Consumer.Contact.Update.Api/Consumer.Contact.Update.Api.csproj"
+RUN dotnet restore "Consumer.Contact.Update.Worker/Consumer.Contact.Update.Worker.csproj"
 COPY . .
 WORKDIR "/src/Consumer.Contact.Update.Worker"
 RUN dotnet build -c Release -o /app/build

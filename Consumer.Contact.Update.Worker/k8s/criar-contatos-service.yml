@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: consumer-atualizar-contatos-service
+  labels:
+    app: consumer-atualizar-contatos
+    tier: backend
+    environment: production
+  annotations:
+    description: "Service para expor o microsserviço consumer-atualizar-contatos"
+spec:
+  type: LoadBalancer
+  selector:
+    app: consumer-atualizar-contatos
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 80

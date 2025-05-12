@@ -25,10 +25,10 @@ jobs:
           dotnet-version: 9.0.x
 
       - name: Restore dependencies
-        run: dotnet restore Consumer.Contact.Create.sln
+        run: dotnet restore Consumer.Contact.Update.sln
 
       - name: Build
-        run: dotnet build Consumer.Contact.Create.sln --configuration Release
+        run: dotnet build Consumer.Contact.Update.sln --configuration Release
 
       - name: Set Environment Variables
         run: |
@@ -37,10 +37,10 @@ jobs:
           echo "RABBITMQSETTINGS__PASSWORD=guest" >> $GITHUB_ENV
 
       - name: Run Unit Tests        
-        run: dotnet test Consumer.Contact.Create.Tests/Consumer.Contact.Create.Tests.csproj --configuration Release --logger "console;verbosity=detailed"
+        run: dotnet test Consumer.Contact.Update.Tests/Consumer.Contact.Update.Tests.csproj --configuration Release --logger "console;verbosity=detailed"
 
       - name: Publish
-        run: dotnet publish Consumer.Contact.Create.Worker/Consumer.Contact.Create.Worker.csproj --configuration Release --output Consumer.Contact.Create.Worker/publish
+        run: dotnet publish Consumer.Contact.Update.Worker/Consumer.Contact.Update.Worker.csproj --configuration Release --output Consumer.Contact.Update.Worker/publish
 
       # --- Adicionando as etapas de Docker, ACR e AKS ---
       - name: Azure Login
@@ -72,7 +72,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/consumer-criar-contatos:latest -f Consumer.Contact.Create.Worker/Dockerfile .
+          docker build -t ${{ secrets.ACR_LOGIN_SERVER }}/consumer-criar-contatos:latest -f Consumer.Contact.Update.Worker/Dockerfile .
 
       - name: Push Docker image to ACR
         run: |
@@ -87,17 +87,17 @@ jobs:
       - name: Update Kubernetes Resources
         run: |
           # Aplica ConfigMap (cria ou atualiza se necessário)
-          kubectl apply -f Consumer.Contact.Create.Worker/k8s/consumer-criar-contatos-configmap.yml
+          kubectl apply -f Consumer.Contact.Update.Worker/k8s/consumer-criar-contatos-configmap.yml
 
           # Aplica Deployment (cria ou atualiza se necessário)
-          kubectl apply -f Consumer.Contact.Create.Worker/k8s/consumer-criar-contatos-deployment.yml
+          kubectl apply -f Consumer.Contact.Update.Worker/k8s/consumer-criar-contatos-deployment.yml
 
           # Aplica PVC e PV (apenas cria ou atualiza, sem deletar)
-          kubectl apply -f Consumer.Contact.Create.Worker/k8s/consumer-criar-contatos-persistent-volume.yml
-          kubectl apply -f Consumer.Contact.Create.Worker/k8s/consumer-criar-contatos-persistent-volume-claim.yml
+          kubectl apply -f Consumer.Contact.Update.Worker/k8s/consumer-criar-contatos-persistent-volume.yml
+          kubectl apply -f Consumer.Contact.Update.Worker/k8s/consumer-criar-contatos-persistent-volume-claim.yml
 
           # Aplica Service (cria ou atualiza se necessário)
-          kubectl apply -f Consumer.Contact.Create.Worker/k8s/consumer-criar-contatos-service.yml
+          kubectl apply -f Consumer.Contact.Update.Worker/k8s/consumer-criar-contatos-service.yml
 
           # Espera o rollout do Deployment para garantir que a atualização foi bem-sucedida
           kubectl rollout status deployment/consumer-criar-contatos-deployment
@@ -106,8 +106,8 @@ jobs:
         uses: azure/k8s-deploy@v1
         with:
           manifests: |
-            Consumer.Contact.Create.Worker/k8s/consumer-criar-contatos-deployment.yml
-            Consumer.Contact.Create.Worker/k8s/consumer-criar-contatos-service.yml
+            Consumer.Contact.Update.Worker/k8s/consumer-criar-contatos-deployment.yml
+            Consumer.Contact.Update.Worker/k8s/consumer-criar-contatos-service.yml
           images: |
             ${{ secrets.ACR_LOGIN_SERVER }}/consumer-criar-contatos:latest
           imagepullsecrets: |
